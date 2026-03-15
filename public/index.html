@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Velox AI — Dashboard</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:#09090a;color:#f0eee8;font-family:sans-serif;}
+.bar{display:flex;align-items:center;justify-content:space-between;padding:18px 24px;border-bottom:1px solid #2e2e35;background:#111113;}
+.logo{font-size:20px;font-weight:900;letter-spacing:2px;}
+.logo span{color:#d4a84b;}
+.live{display:flex;align-items:center;gap:8px;font-size:11px;color:#3ecf8e;border:1px solid rgba(62,207,142,0.3);padding:6px 12px;}
+.dot{width:6px;height:6px;border-radius:50%;background:#3ecf8e;animation:blink 1.5s infinite;}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0.3;}}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;background:#2e2e35;}
+.stat{background:#111113;padding:24px;text-align:center;}
+.stat-val{font-size:48px;font-weight:900;color:#d4a84b;line-height:1;}
+.stat-val.g{color:#3ecf8e;}
+.stat-lbl{font-size:10px;color:#65656f;letter-spacing:2px;text-transform:uppercase;margin-top:4px;}
+.content{padding:24px;}
+.sh{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
+.st{font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#9898a5;}
+.badge{font-size:10px;background:rgba(212,168,75,0.1);border:1px solid #d4a84b;color:#d4a84b;padding:4px 12px;}
+table{width:100%;border-collapse:collapse;}
+th{font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#404048;padding:10px 12px;text-align:left;font-weight:400;border-bottom:1px solid #2e2e35;}
+td{padding:14px 12px;font-size:13px;border-bottom:1px solid rgba(46,46,53,0.5);}
+.eb{display:inline-block;padding:3px 8px;font-size:9px;letter-spacing:1px;text-transform:uppercase;}
+.em{background:rgba(240,96,96,0.15);color:#f06060;border:1px solid rgba(240,96,96,0.3);}
+.ro{background:rgba(62,207,142,0.1);color:#3ecf8e;border:1px solid rgba(62,207,142,0.25);}
+.ph{font-size:11px;color:#9898a5;}
+.iss{max-width:220px;color:#9898a5;font-size:12px;}
+.tm{font-size:10px;color:#65656f;}
+.empty{padding:60px 24px;text-align:center;border:1px dashed #2e2e35;background:#111113;}
+.empty-t{font-size:28px;font-weight:900;color:#404048;margin:12px 0 8px;}
+.empty-s{font-size:12px;color:#65656f;line-height:1.7;}
+.toast{position:fixed;bottom:24px;right:24px;background:#202025;border:1px solid #d4a84b;padding:14px 20px;max-width:280px;transform:translateX(120%);transition:transform 0.3s;z-index:99;}
+.toast.show{transform:translateX(0);}
+.toast-t{font-size:13px;font-weight:700;color:#d4a84b;margin-bottom:4px;}
+.toast-b{font-size:11px;color:#65656f;line-height:1.5;}
+</style>
+</head>
+<body>
+<div class="bar">
+  <div class="logo">VELOX<span>AI</span></div>
+  <div class="live"><span class="dot"></span>LIVE</div>
+</div>
+<div class="stats">
+  <div class="stat"><div class="stat-val" id="s-total">0</div><div class="stat-lbl">Total Leads</div></div>
+  <div class="stat"><div class="stat-val g" id="s-today">0</div><div class="stat-lbl">Today</div></div>
+  <div class="stat"><div class="stat-val" id="s-active">0</div><div class="stat-lbl">Active Calls</div></div>
+</div>
+<div class="content">
+  <div class="sh">
+    <div class="st">All Leads</div>
+    <span class="badge" id="lcount">0 leads</span>
+  </div>
+  <div id="leads-wrap"></div>
+</div>
+<div class="toast" id="toast">
+  <div class="toast-t" id="toast-t"></div>
+  <div class="toast-b" id="toast-b"></div>
+</div>
+<script>
+let last=0;
+function fmt(iso){const d=new Date(iso);return d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});}
+function toast(t,b){const el=document.getElementById('toast');document.getElementById('toast-t').textContent=t;document.getElementById('toast-b').textContent=b;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),5000);}
+function render(leads){
+  document.getElementById('lcount').textContent=leads.length+' lead'+(leads.length!==1?'s':'');
+  if(!leads.length){document.getElementById('leads-wrap').innerHTML='<div class="empty"><div style="font-size:40px">📞</div><div class="empty-t">Waiting for calls</div><div class="empty-s">When someone calls your number,<br/>leads appear here in real time.</div></div>';return;}
+  document.getElementById('leads-wrap').innerHTML='<table><thead><tr><th>Type</th><th>Name</th><th>Phone</th><th>Issue</th><th>Time</th></tr></thead><tbody>'+
+  leads.map(l=>`<tr><td><span class="eb ${l.urgency==='emergency'?'em':'ro'}">${l.urgency==='emergency'?'🚨 Emergency':'✅ Routine'}</span></td><td>${l.name}</td><td class="ph">${l.callbackPhone}</td><td class="iss">${l.issue}</td><td class="tm">${fmt(l.timestamp)}</td></tr>`).join('')+
+  '</tbody></table>';
+}
+async function poll(){
+  try{
+    const[sr,lr]=await Promise.all([fetch('/api/stats'),fetch('/api/leads')]);
+    const s=await sr.json(),leads=await lr.json();
+    document.getElementById('s-total').textContent=s.totalLeads;
+    document.getElementById('s-today').textContent=s.leadsToday;
+    document.getElementById('s-active').textContent=s.activeCalls;
+    if(leads.length>last&&last>0){const n=leads[0];toast(n.urgency==='emergency'?'🚨 Emergency!':'📋 New Lead',n.name+' — '+n.issue);}
+    last=leads.length;
+    render(leads);
+  }catch(e){console.error(e);}
+}
+poll();setInterval(poll,5000);
+</script>
+</body>
+  </html>
