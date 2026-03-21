@@ -119,7 +119,7 @@ let active = false;
 function loadVapi(cb) {
   if (window.Vapi) { cb(); return; }
   const s = document.createElement('script');
-  s.src = 'https://cdn.jsdelivr.net/npm/@vapi-ai/web/dist/vapi.iife.js';
+  s.src = 'https://unpkg.com/@vapi-ai/web@latest/dist/vapi.iife.js
   s.onload = cb;
   s.onerror = () => setStatus('Failed to load VAPI SDK', 'err');
   document.head.appendChild(s);
