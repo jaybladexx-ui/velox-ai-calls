@@ -3,483 +3,162 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Johnson Law Group — AI Receptionist Demo</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@300;400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet"/>
-<script src="https://cdn.jsdelivr.net/npm/@vapi-ai/web@latest/dist/vapi.js"></script>
+<title>Johnson Law Group — AI Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=Syne:wght@600;700;800&display=swap" rel="stylesheet"/>
 <style>
-*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
-:root{
-  --black:#07070a;--coal:#0f0f14;--slate:#17171e;
-  --border:#252530;--muted:#353542;--dim:#606070;
-  --fog:#909098;--cream:#f0ede6;--white:#fafaf6;
-  --gold:#d4a84b;--amber:#f5b840;--green:#3ecf8e;--red:#f06060;
-}
-html{scroll-behavior:smooth;}
-body{
-  background:var(--black);color:var(--cream);
-  font-family:'Syne',sans-serif;min-height:100vh;
-  overflow-x:hidden;
-}
-
-/* NOISE */
-body::before{
-  content:'';position:fixed;inset:0;z-index:1000;
-  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
-  opacity:.025;pointer-events:none;
-}
-
-/* GRID BG */
-.grid-bg{
-  position:fixed;inset:0;
-  background-image:
-    linear-gradient(rgba(212,168,75,.03) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(212,168,75,.03) 1px,transparent 1px);
-  background-size:60px 60px;
-  mask-image:radial-gradient(ellipse 80% 80% at 50% 50%,black 30%,transparent 100%);
-  pointer-events:none;
-}
-
-/* GLOW */
-.glow{
-  position:fixed;width:500px;height:500px;
-  background:radial-gradient(circle,rgba(212,168,75,.08) 0%,transparent 70%);
-  top:-100px;right:-100px;pointer-events:none;
-  animation:glowPulse 6s ease-in-out infinite;
-}
-@keyframes glowPulse{
-  0%,100%{transform:scale(1);opacity:1;}
-  50%{transform:scale(1.1);opacity:.6;}
-}
-
-/* WRAPPER */
-.wrapper{
-  min-height:100vh;display:flex;flex-direction:column;
-  align-items:center;justify-content:center;
-  padding:48px 24px;position:relative;z-index:1;
-  text-align:center;
-}
-
-/* BADGE */
-.badge{
-  display:inline-flex;align-items:center;gap:8px;
-  font-family:'DM Mono',monospace;font-size:10px;
-  letter-spacing:.25em;text-transform:uppercase;
-  color:var(--gold);border:1px solid rgba(212,168,75,.25);
-  padding:8px 18px;margin-bottom:32px;
-  background:rgba(212,168,75,.04);
-  animation:fadeUp .8s .1s both;
-}
-.badge-dot{
-  width:6px;height:6px;border-radius:50%;
-  background:var(--green);animation:pulse 2s infinite;
-}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:#07070a;color:#f0ede6;font-family:'Syne',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 20px;text-align:center;}
+.badge{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.25em;text-transform:uppercase;color:#d4a84b;border:1px solid rgba(212,168,75,.25);padding:8px 18px;margin-bottom:28px;display:inline-flex;align-items:center;gap:8px;}
+.dot{width:6px;height:6px;border-radius:50%;background:#3ecf8e;animation:pulse 2s infinite;}
 @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(48px,12vw,100px);line-height:.92;color:#fff;margin-bottom:16px;}
+h1 span{color:#d4a84b;}
+p{font-family:'DM Mono',monospace;font-size:13px;color:#909098;line-height:1.8;max-width:480px;margin:0 auto 40px;}
+p strong{color:#e8c77a;}
 
-/* HEADLINE */
-.headline{
-  font-family:'Bebas Neue',sans-serif;
-  font-size:clamp(52px,10vw,120px);
-  line-height:.92;letter-spacing:.02em;
-  color:var(--white);margin-bottom:16px;
-  animation:fadeUp .9s .2s both;
-}
-.headline em{
-  font-family:'Syne',sans-serif;
-  font-style:normal;font-weight:800;
-  color:var(--gold);font-size:.6em;
-  display:block;letter-spacing:.05em;
-}
-
-/* SUB */
-.sub{
-  font-family:'DM Mono',monospace;
-  font-size:14px;color:var(--fog);
-  line-height:1.8;max-width:520px;
-  margin:0 auto 48px;
-  animation:fadeUp .9s .35s both;
-}
-.sub strong{color:var(--gold-lt);color:#e8c77a;}
-
-/* CALL BUTTON */
-.call-wrap{
-  animation:fadeUp .9s .5s both;
-  margin-bottom:48px;
-}
+.btn-wrap{margin-bottom:32px;}
 .btn-call{
-  position:relative;
-  width:180px;height:180px;
-  border-radius:50%;
-  background:transparent;
-  border:none;cursor:pointer;
-  display:flex;flex-direction:column;
-  align-items:center;justify-content:center;
-  gap:8px;
-  margin:0 auto;
+  width:160px;height:160px;border-radius:50%;
+  background:rgba(212,168,75,.08);
+  border:2px solid rgba(212,168,75,.4);
+  cursor:pointer;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:8px;
+  transition:all .3s;position:relative;
+  outline:none;
 }
-.btn-call-ring{
-  position:absolute;inset:0;border-radius:50%;
-  border:2px solid var(--gold);
-  animation:ringPulse 2s ease-in-out infinite;
+.btn-call::before{
+  content:'';position:absolute;inset:-12px;border-radius:50%;
+  border:1px solid rgba(212,168,75,.2);
+  animation:ring 2s ease-in-out infinite;
 }
-.btn-call-ring2{
-  position:absolute;inset:-16px;border-radius:50%;
-  border:1px solid rgba(212,168,75,.3);
-  animation:ringPulse 2s ease-in-out infinite .4s;
+.btn-call::after{
+  content:'';position:absolute;inset:-24px;border-radius:50%;
+  border:1px solid rgba(212,168,75,.1);
+  animation:ring 2s ease-in-out infinite .4s;
 }
-.btn-call-ring3{
-  position:absolute;inset:-32px;border-radius:50%;
-  border:1px solid rgba(212,168,75,.15);
-  animation:ringPulse 2s ease-in-out infinite .8s;
-}
-@keyframes ringPulse{
-  0%,100%{transform:scale(1);opacity:1;}
-  50%{transform:scale(1.05);opacity:.6;}
-}
-.btn-call-inner{
-  width:140px;height:140px;border-radius:50%;
-  background:linear-gradient(135deg,rgba(212,168,75,.15),rgba(212,168,75,.05));
-  border:1px solid rgba(212,168,75,.4);
-  display:flex;flex-direction:column;
-  align-items:center;justify-content:center;
-  gap:6px;
-  transition:all .3s;
-  position:relative;z-index:1;
-}
-.btn-call:hover .btn-call-inner{
-  background:linear-gradient(135deg,rgba(212,168,75,.25),rgba(212,168,75,.1));
-  border-color:var(--gold);
-  transform:scale(1.05);
-}
-.btn-call:active .btn-call-inner{transform:scale(.97);}
-.call-icon{font-size:40px;transition:transform .3s;}
-.btn-call:hover .call-icon{transform:rotate(15deg);}
-.call-label{
-  font-family:'DM Mono',monospace;font-size:10px;
-  letter-spacing:.2em;text-transform:uppercase;
-  color:var(--gold);
-}
-
-/* ACTIVE CALL STATE */
-.btn-call.active .btn-call-ring{border-color:var(--green);animation:none;}
-.btn-call.active .btn-call-ring2{border-color:rgba(62,207,142,.4);}
-.btn-call.active .btn-call-ring3{border-color:rgba(62,207,142,.2);}
-.btn-call.active .btn-call-inner{
-  background:linear-gradient(135deg,rgba(62,207,142,.15),rgba(62,207,142,.05));
-  border-color:rgba(62,207,142,.5);
-}
-.btn-call.active .call-label{color:var(--green);}
-
-/* WAVE ANIMATION */
-.waves{
-  display:none;align-items:center;gap:3px;height:24px;
-}
-.btn-call.active .waves{display:flex;}
+@keyframes ring{0%,100%{transform:scale(1);opacity:1;}50%{transform:scale(1.04);opacity:.5;}}
+.btn-call:hover{background:rgba(212,168,75,.15);border-color:rgba(212,168,75,.7);transform:scale(1.05);}
+.btn-call.active{background:rgba(62,207,142,.1);border-color:rgba(62,207,142,.5);}
+.btn-call.active::before{border-color:rgba(62,207,142,.3);}
+.btn-call.active::after{border-color:rgba(62,207,142,.15);}
+.call-icon{font-size:40px;}
 .btn-call.active .call-icon{display:none;}
-.wave-bar{
-  width:3px;background:var(--green);border-radius:2px;
-  animation:wave .8s ease-in-out infinite;
-}
-.wave-bar:nth-child(1){animation-delay:0s;}
-.wave-bar:nth-child(2){animation-delay:.1s;}
-.wave-bar:nth-child(3){animation-delay:.2s;}
-.wave-bar:nth-child(4){animation-delay:.3s;}
-.wave-bar:nth-child(5){animation-delay:.2s;}
-.wave-bar:nth-child(6){animation-delay:.1s;}
-.wave-bar:nth-child(7){animation-delay:0s;}
-@keyframes wave{
-  0%,100%{height:4px;}
-  50%{height:20px;}
-}
+.call-lbl{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#d4a84b;}
+.btn-call.active .call-lbl{color:#3ecf8e;}
 
-/* STATUS */
-.status-text{
-  font-family:'DM Mono',monospace;font-size:12px;
-  color:var(--dim);letter-spacing:.15em;margin-top:16px;
-  text-transform:uppercase;min-height:20px;
-  transition:color .3s;
-}
-.status-text.active{color:var(--green);}
-.status-text.error{color:var(--red);}
+.waves{display:none;align-items:center;gap:3px;height:28px;}
+.btn-call.active .waves{display:flex;}
+.bar{width:3px;background:#3ecf8e;border-radius:2px;animation:wave .8s ease-in-out infinite;}
+.bar:nth-child(1){animation-delay:0s;}
+.bar:nth-child(2){animation-delay:.1s;}
+.bar:nth-child(3){animation-delay:.2s;}
+.bar:nth-child(4){animation-delay:.3s;}
+.bar:nth-child(5){animation-delay:.2s;}
+@keyframes wave{0%,100%{height:4px;}50%{height:24px;}}
 
-/* FEATURES */
-.features{
-  display:flex;gap:32px;flex-wrap:wrap;
-  justify-content:center;margin-bottom:48px;
-  animation:fadeUp .9s .65s both;
-}
-.feature{
-  display:flex;align-items:center;gap:8px;
-  font-family:'DM Mono',monospace;font-size:11px;
-  color:var(--dim);letter-spacing:.1em;
-}
-.feature-dot{width:6px;height:6px;border-radius:50%;background:var(--gold);}
+.status{font-family:'DM Mono',monospace;font-size:11px;color:#606070;letter-spacing:.15em;text-transform:uppercase;min-height:18px;margin-top:14px;transition:color .3s;}
+.status.on{color:#3ecf8e;}
+.status.err{color:#f06060;}
 
-/* DIVIDER */
-.divider{
-  width:60px;height:1px;
-  background:linear-gradient(90deg,transparent,var(--gold),transparent);
-  margin:0 auto 32px;
-  animation:fadeUp .9s .7s both;
-}
+.features{display:flex;flex-wrap:wrap;gap:20px;justify-content:center;margin-bottom:40px;}
+.feat{font-family:'DM Mono',monospace;font-size:11px;color:#606070;display:flex;align-items:center;gap:6px;}
+.feat::before{content:'';width:5px;height:5px;border-radius:50%;background:#d4a84b;}
 
-/* DISCLAIMER */
-.disclaimer{
-  font-family:'DM Mono',monospace;font-size:10px;
-  color:var(--muted);letter-spacing:.1em;line-height:1.7;
-  max-width:400px;margin:0 auto;
-  border:1px solid var(--border);padding:16px 20px;
-  background:rgba(255,255,255,.01);
-  animation:fadeUp .9s .8s both;
-}
-.disclaimer strong{color:var(--dim);}
+.note{font-family:'DM Mono',monospace;font-size:10px;color:#353542;border:1px solid #252530;padding:14px 18px;max-width:380px;line-height:1.7;}
+.note strong{color:#505060;}
 
-/* FOOTER */
-.footer{
-  position:fixed;bottom:0;left:0;right:0;
-  padding:16px 32px;
-  display:flex;align-items:center;justify-content:space-between;
-  border-top:1px solid var(--border);
-  background:rgba(7,7,10,.9);backdrop-filter:blur(12px);
-  z-index:100;
-}
-.footer-logo{
-  font-family:'Bebas Neue',sans-serif;
-  font-size:18px;letter-spacing:.12em;color:var(--white);
-}
-.footer-logo span{color:var(--gold);}
-.footer-tag{
-  font-family:'DM Mono',monospace;font-size:10px;
-  color:var(--muted);letter-spacing:.15em;
-}
-
-@keyframes fadeUp{
-  from{opacity:0;transform:translateY(20px);}
-  to{opacity:1;transform:translateY(0);}
-}
-
-/* TRANSCRIPT */
-.transcript{
-  max-width:560px;width:100%;margin:0 auto 32px;
-  display:none;
-  animation:fadeUp .4s both;
-}
-.transcript.show{display:block;}
-.transcript-title{
-  font-family:'DM Mono',monospace;font-size:9px;
-  letter-spacing:.25em;text-transform:uppercase;
-  color:var(--dim);margin-bottom:12px;
-}
-.transcript-messages{
-  display:flex;flex-direction:column;gap:8px;
-  max-height:200px;overflow-y:auto;
-}
-.msg{
-  padding:10px 16px;font-size:13px;line-height:1.6;
-  text-align:left;
-}
-.msg-ai{
-  background:rgba(212,168,75,.06);
-  border-left:2px solid var(--gold);
-  color:var(--cream);
-}
-.msg-user{
-  background:rgba(91,142,240,.06);
-  border-left:2px solid #5b8ef0;
-  color:var(--fog);
-}
-
-@media(max-width:600px){
-  .features{gap:16px;}
-  .footer{padding:12px 20px;}
-}
+.footer{position:fixed;bottom:0;left:0;right:0;padding:14px 28px;display:flex;justify-content:space-between;align-items:center;border-top:1px solid #1a1a22;background:rgba(7,7,10,.95);}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:.1em;}
+.logo span{color:#d4a84b;}
+.ftag{font-family:'DM Mono',monospace;font-size:10px;color:#353542;}
 </style>
 </head>
 <body>
 
-<div class="grid-bg"></div>
-<div class="glow"></div>
+<div class="badge"><span class="dot"></span>Live Demo — Johnson Law Group AI</div>
 
-<div class="wrapper">
+<h1>24/7 AI<br/><span>Receptionist</span></h1>
 
-  <div class="badge">
-    <span class="badge-dot"></span>
-    Live Demo — Johnson Law Group AI
-  </div>
+<p>Tap the button and speak as if you're an injured client calling after hours. Riley will answer, collect your details, and <strong>book a consultation automatically.</strong></p>
 
-  <h1 class="headline">
-    <em>Experience</em>
-    24/7 AI
-    <br/>Receptionist
-  </h1>
-
-  <p class="sub">
-    Click the button below and speak as if you're a potential client calling Johnson Law Group after hours. Riley — our AI receptionist — will answer, collect your details, and <strong>book a consultation automatically.</strong>
-  </p>
-
-  <!-- CALL BUTTON -->
-  <div class="call-wrap">
-    <button class="btn-call" id="callBtn" onclick="toggleCall()">
-      <div class="btn-call-ring"></div>
-      <div class="btn-call-ring2"></div>
-      <div class="btn-call-ring3"></div>
-      <div class="btn-call-inner">
-        <span class="call-icon">📞</span>
-        <div class="waves">
-          <div class="wave-bar"></div>
-          <div class="wave-bar"></div>
-          <div class="wave-bar"></div>
-          <div class="wave-bar"></div>
-          <div class="wave-bar"></div>
-          <div class="wave-bar"></div>
-          <div class="wave-bar"></div>
-        </div>
-        <span class="call-label" id="callLabel">Tap to Call</span>
-      </div>
-    </button>
-    <div class="status-text" id="statusText">Available 24 hours a day</div>
-  </div>
-
-  <!-- TRANSCRIPT -->
-  <div class="transcript" id="transcript">
-    <div class="transcript-title">// Live Conversation</div>
-    <div class="transcript-messages" id="messages"></div>
-  </div>
-
-  <!-- FEATURES -->
-  <div class="features">
-    <div class="feature"><span class="feature-dot"></span>Answers in under 2 seconds</div>
-    <div class="feature"><span class="feature-dot"></span>Books appointments live</div>
-    <div class="feature"><span class="feature-dot"></span>Alerts attorney instantly</div>
-    <div class="feature"><span class="feature-dot"></span>Works 24/7/365</div>
-  </div>
-
-  <div class="divider"></div>
-
-  <div class="disclaimer">
-    <strong>This is a live demo.</strong> Riley is answering as Johnson Law Group AI. In production, this would be customized with your firm's name, practice areas, and attorney details. Every conversation automatically books into your calendar and texts your team.
-  </div>
-
+<div class="btn-wrap">
+  <button class="btn-call" id="btn" onclick="toggleCall()">
+    <span class="call-icon">📞</span>
+    <div class="waves">
+      <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+      <div class="bar"></div><div class="bar"></div>
+    </div>
+    <span class="call-lbl" id="lbl">Tap to Call</span>
+  </button>
+  <div class="status" id="status">Available 24 hours a day</div>
 </div>
 
-<!-- FOOTER -->
+<div class="features">
+  <div class="feat">Answers in 2 seconds</div>
+  <div class="feat">Books appointments live</div>
+  <div class="feat">Alerts attorney instantly</div>
+  <div class="feat">Works 24/7/365</div>
+</div>
+
+<div class="note">
+  <strong>This is a live demo.</strong> In production, Riley answers on your firm's actual phone number with your name, attorneys, and practice areas fully customized.
+</div>
+
 <div class="footer">
-  <div class="footer-logo">VELOX<span>AI</span></div>
-  <div class="footer-tag">Powered by Velox AI · veloxai.com</div>
+  <div class="logo">VELOX<span>AI</span></div>
+  <div class="ftag">veloxai.com</div>
 </div>
 
 <script>
-// ── PASTE YOUR VAPI PUBLIC KEY AND ASSISTANT ID HERE ──
-const VAPI_PUBLIC_KEY = 3b5ed616-1176-40cc-aeba-fdfa8de3124c'
-const ASSISTANT_ID    = '043e1008-3473-4173-a04e-be0a67828d62';
+const PUBLIC_KEY   = '3b5ed616-1176-40cc-aeba-fdfa8de3124c';
+const ASSISTANT_ID = '043e1008-3473-4173-a04e-be0a67828d62';
 
 let vapi = null;
-let isCallActive = false;
+let active = false;
+
+function loadVapi(cb) {
+  if (window.Vapi) { cb(); return; }
+  const s = document.createElement('script');
+  s.src = 'https://cdn.jsdelivr.net/npm/@vapi-ai/web/dist/vapi.iife.js';
+  s.onload = cb;
+  s.onerror = () => setStatus('Failed to load VAPI SDK', 'err');
+  document.head.appendChild(s);
+}
 
 function initVapi() {
-  if (typeof window.Vapi === 'undefined') {
-    console.error('VAPI SDK not loaded');
-    return;
-  }
-  vapi = new window.Vapi(VAPI_PUBLIC_KEY);
-
-  vapi.on('call-start', () => {
-    setCallActive(true);
-    setStatus('Connected — Riley is listening...', 'active');
-    addMessage('ai', 'Thank you for calling Johnson Law Group. This is Sarah, available 24 hours a day. Have you or someone you love been injured in an accident?');
-  });
-
-  vapi.on('call-end', () => {
-    setCallActive(false);
-    setStatus('Call ended — Check your calendar for the booking!', '');
-  });
-
-  vapi.on('speech-start', () => {
-    setStatus('Riley is speaking...', 'active');
-  });
-
-  vapi.on('speech-end', () => {
-    setStatus('Listening...', 'active');
-  });
-
-  vapi.on('message', (msg) => {
-    if (msg.type === 'transcript') {
-      if (msg.role === 'assistant') {
-        addMessage('ai', msg.transcript);
-      } else if (msg.role === 'user') {
-        addMessage('user', msg.transcript);
-      }
-    }
-  });
-
-  vapi.on('error', (err) => {
-    console.error('VAPI error:', err);
-    setCallActive(false);
-    setStatus('Connection error — please try again', 'error');
-  });
+  vapi = new window.Vapi(PUBLIC_KEY);
+  vapi.on('call-start',  () => { setActive(true);  setStatus('Connected — Riley is listening...', 'on'); });
+  vapi.on('call-end',    () => { setActive(false); setStatus('Call ended — check your calendar!', ''); });
+  vapi.on('speech-start',() => setStatus('Riley is speaking...', 'on'));
+  vapi.on('speech-end',  () => setStatus('Listening...', 'on'));
+  vapi.on('error', e    => { setActive(false); setStatus('Error: ' + (e.message || 'check mic permissions'), 'err'); console.error(e); });
 }
 
 function toggleCall() {
-  if (!vapi) {
-    initVapi();
-    setTimeout(startCall, 500);
-    return;
-  }
-  if (isCallActive) {
-    endCall();
+  if (!active) {
+    loadVapi(() => {
+      if (!vapi) initVapi();
+      setStatus('Connecting...', '');
+      vapi.start(ASSISTANT_ID);
+    });
   } else {
-    startCall();
+    if (vapi) vapi.stop();
+    setActive(false);
+    setStatus('Available 24 hours a day', '');
   }
 }
 
-function startCall() {
-  if (!vapi) { initVapi(); }
-  setStatus('Connecting to Riley...', '');
-  try {
-    vapi.start(ASSISTANT_ID);
-  } catch(e) {
-    setStatus('Error starting call — check your API key', 'error');
-  }
+function setActive(a) {
+  active = a;
+  document.getElementById('btn').classList.toggle('active', a);
+  document.getElementById('lbl').textContent = a ? 'End Call' : 'Tap to Call';
 }
 
-function endCall() {
-  if (vapi) vapi.stop();
-  setCallActive(false);
-  setStatus('Call ended', '');
+function setStatus(t, cls) {
+  const el = document.getElementById('status');
+  el.textContent = t;
+  el.className = 'status' + (cls ? ' ' + cls : '');
 }
-
-function setCallActive(active) {
-  isCallActive = active;
-  const btn = document.getElementById('callBtn');
-  const label = document.getElementById('callLabel');
-  const transcript = document.getElementById('transcript');
-  if (active) {
-    btn.classList.add('active');
-    label.textContent = 'End Call';
-    transcript.classList.add('show');
-  } else {
-    btn.classList.remove('active');
-    label.textContent = 'Tap to Call';
-  }
-}
-
-function setStatus(text, type) {
-  const el = document.getElementById('statusText');
-  el.textContent = text;
-  el.className = 'status-text' + (type ? ' ' + type : '');
-}
-
-function addMessage(role, text) {
-  if (!text || text.trim() === '') return;
-  const msgs = document.getElementById('messages');
-  const div = document.createElement('div');
-  div.className = `msg msg-${role === 'ai' ? 'ai' : 'user'}`;
-  div.innerHTML = `<strong>${role === 'ai' ? '🤖 Riley' : '👤 You'}:</strong> ${text}`;
-  msgs.appendChild(div);
-  msgs.scrollTop = msgs.scrollHeight;
-}
-
-// Init on load
-window.addEventListener('load', initVapi);
 </script>
 </body>
-  </html>
+</html>
