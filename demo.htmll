@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Johnson Law Group — AI Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500&family=Syne:wght@600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:#07070a;color:#f0ede6;font-family:'Syne',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 20px;text-align:center;}
+.badge{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.25em;text-transform:uppercase;color:#d4a84b;border:1px solid rgba(212,168,75,.25);padding:8px 18px;margin-bottom:28px;display:inline-flex;align-items:center;gap:8px;}
+.dot{width:6px;height:6px;border-radius:50%;background:#3ecf8e;animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(48px,12vw,100px);line-height:.92;color:#fff;margin-bottom:16px;}
+h1 span{color:#d4a84b;}
+p{font-family:'DM Mono',monospace;font-size:13px;color:#909098;line-height:1.8;max-width:480px;margin:0 auto 40px;}
+p strong{color:#e8c77a;}
+
+.btn-wrap{margin-bottom:32px;}
+.btn-call{
+  width:160px;height:160px;border-radius:50%;
+  background:rgba(212,168,75,.08);
+  border:2px solid rgba(212,168,75,.4);
+  cursor:pointer;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;gap:8px;
+  transition:all .3s;position:relative;
+  outline:none;
+}
+.btn-call::before{
+  content:'';position:absolute;inset:-12px;border-radius:50%;
+  border:1px solid rgba(212,168,75,.2);
+  animation:ring 2s ease-in-out infinite;
+}
+.btn-call::after{
+  content:'';position:absolute;inset:-24px;border-radius:50%;
+  border:1px solid rgba(212,168,75,.1);
+  animation:ring 2s ease-in-out infinite .4s;
+}
+@keyframes ring{0%,100%{transform:scale(1);opacity:1;}50%{transform:scale(1.04);opacity:.5;}}
+.btn-call:hover{background:rgba(212,168,75,.15);border-color:rgba(212,168,75,.7);transform:scale(1.05);}
+.btn-call.active{background:rgba(62,207,142,.1);border-color:rgba(62,207,142,.5);}
+.btn-call.active::before{border-color:rgba(62,207,142,.3);}
+.btn-call.active::after{border-color:rgba(62,207,142,.15);}
+.call-icon{font-size:40px;}
+.btn-call.active .call-icon{display:none;}
+.call-lbl{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:#d4a84b;}
+.btn-call.active .call-lbl{color:#3ecf8e;}
+
+.waves{display:none;align-items:center;gap:3px;height:28px;}
+.btn-call.active .waves{display:flex;}
+.bar{width:3px;background:#3ecf8e;border-radius:2px;animation:wave .8s ease-in-out infinite;}
+.bar:nth-child(1){animation-delay:0s;}
+.bar:nth-child(2){animation-delay:.1s;}
+.bar:nth-child(3){animation-delay:.2s;}
+.bar:nth-child(4){animation-delay:.3s;}
+.bar:nth-child(5){animation-delay:.2s;}
+@keyframes wave{0%,100%{height:4px;}50%{height:24px;}}
+
+.status{font-family:'DM Mono',monospace;font-size:11px;color:#606070;letter-spacing:.15em;text-transform:uppercase;min-height:18px;margin-top:14px;transition:color .3s;}
+.status.on{color:#3ecf8e;}
+.status.err{color:#f06060;}
+
+.features{display:flex;flex-wrap:wrap;gap:20px;justify-content:center;margin-bottom:40px;}
+.feat{font-family:'DM Mono',monospace;font-size:11px;color:#606070;display:flex;align-items:center;gap:6px;}
+.feat::before{content:'';width:5px;height:5px;border-radius:50%;background:#d4a84b;}
+
+.note{font-family:'DM Mono',monospace;font-size:10px;color:#353542;border:1px solid #252530;padding:14px 18px;max-width:380px;line-height:1.7;}
+.note strong{color:#505060;}
+
+.footer{position:fixed;bottom:0;left:0;right:0;padding:14px 28px;display:flex;justify-content:space-between;align-items:center;border-top:1px solid #1a1a22;background:rgba(7,7,10,.95);}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:.1em;}
+.logo span{color:#d4a84b;}
+.ftag{font-family:'DM Mono',monospace;font-size:10px;color:#353542;}
+</style>
+</head>
+<body>
+
+<div class="badge"><span class="dot"></span>Live Demo — Johnson Law Group AI</div>
+
+<h1>24/7 AI<br/><span>Receptionist</span></h1>
+
+<p>Tap the button and speak as if you're an injured client calling after hours. Riley will answer, collect your details, and <strong>book a consultation automatically.</strong></p>
+
+<div class="btn-wrap">
+  <button class="btn-call" id="btn" onclick="toggleCall()">
+    <span class="call-icon">📞</span>
+    <div class="waves">
+      <div class="bar"></div><div class="bar"></div><div class="bar"></div>
+      <div class="bar"></div><div class="bar"></div>
+    </div>
+    <span class="call-lbl" id="lbl">Tap to Call</span>
+  </button>
+  <div class="status" id="status">Available 24 hours a day</div>
+</div>
+
+<div class="features">
+  <div class="feat">Answers in 2 seconds</div>
+  <div class="feat">Books appointments live</div>
+  <div class="feat">Alerts attorney instantly</div>
+  <div class="feat">Works 24/7/365</div>
+</div>
+
+<div class="note">
+  <strong>This is a live demo.</strong> In production, Riley answers on your firm's actual phone number with your name, attorneys, and practice areas fully customized.
+</div>
+
+<div class="footer">
+  <div class="logo">VELOX<span>AI</span></div>
+  <div class="ftag">veloxai.com</div>
+</div>
+
+<script>
+const PUBLIC_KEY   = '3b5ed616-1176-40cc-aeba-fdfa8de3124c';
+const ASSISTANT_ID = '043e1008-3473-4173-a04e-be0a67828d62';
+
+let vapi = null;
+let active = false;
+
+function loadVapi(cb) {
+  if (window.Vapi) { cb(); return; }
+  const s = document.createElement('script');
+  s.src = 'https://cdn.jsdelivr.net/npm/@vapi-ai/web/dist/vapi.iife.js';
+  s.onload = cb;
+  s.onerror = () => setStatus('Failed to load VAPI SDK', 'err');
+  document.head.appendChild(s);
+}
+
+function initVapi() {
+  vapi = new window.Vapi(PUBLIC_KEY);
+  vapi.on('call-start',  () => { setActive(true);  setStatus('Connected — Riley is listening...', 'on'); });
+  vapi.on('call-end',    () => { setActive(false); setStatus('Call ended — check your calendar!', ''); });
+  vapi.on('speech-start',() => setStatus('Riley is speaking...', 'on'));
+  vapi.on('speech-end',  () => setStatus('Listening...', 'on'));
+  vapi.on('error', e    => { setActive(false); setStatus('Error: ' + (e.message || 'check mic permissions'), 'err'); console.error(e); });
+}
+
+function toggleCall() {
+  if (!active) {
+    loadVapi(() => {
+      if (!vapi) initVapi();
+      setStatus('Connecting...', '');
+      vapi.start(ASSISTANT_ID);
+    });
+  } else {
+    if (vapi) vapi.stop();
+    setActive(false);
+    setStatus('Available 24 hours a day', '');
+  }
+}
+
+function setActive(a) {
+  active = a;
+  document.getElementById('btn').classList.toggle('active', a);
+  document.getElementById('lbl').textContent = a ? 'End Call' : 'Tap to Call';
+}
+
+function setStatus(t, cls) {
+  const el = document.getElementById('status');
+  el.textContent = t;
+  el.className = 'status' + (cls ? ' ' + cls : '');
+}
+</script>
+</body>
+                                                      </html>
